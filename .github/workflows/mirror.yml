@@ -10,18 +10,23 @@ jobs:
   Download-and-upload:
     runs-on: ubuntu-latest
     steps:
-      - name: Cache
-        uses: actions/cache@v3
+      - name: Get Cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/repo
           # key should be commit sha1
-          key: arch-mact2-${{ github.sha }} 
-          restore-keys: |
-            arch-mact2-*
+          key: arch-mact2-*
+          fail-on-cache-miss: false
 
       - name: Download
         run: |
           rsync -avz --delete rsync://mirror.funami.tech/arch-mact2/ ${{ github.workspace }}/repo
+
+      - name: Save Cache
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/repo 
+          key: arch-mact2-${{ github.sha }}
 
       - name: Upload
         env:
@@ -29,4 +34,5 @@ jobs:
         run: |
           cd ${{ github.workspace }}/repo/os/x86_64
           gh release upload release ./* --clobber -R NoaHimesaka1873/arch-mact2-mirror
+
 
