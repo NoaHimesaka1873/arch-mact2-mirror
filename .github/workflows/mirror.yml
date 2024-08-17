@@ -17,8 +17,14 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/repo
-          key: arch-mact2-${{ github.sha }} 
+          key: arch-mact2 
           fail-on-cache-miss: false
+      
+      - name: Delete Cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh actions-cache delete arch-mact2 -R NoaHimesaka1873/arch-mact2-mirror -B senpai --confirm || true
 
       - name: Download
         run: |
@@ -28,7 +34,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/repo 
-          key: arch-mact2-${{ github.sha }}
+          key: arch-mact2
 
       - name: Upload
         env:
