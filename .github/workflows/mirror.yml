@@ -14,7 +14,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/repo
-          key: arch-mact2-${{ commit.sha }}
+          # key should be commit sha1
+          key: arch-mact2-${{ github.sha }} 
           restore-keys: |
             arch-mact2-*
 
