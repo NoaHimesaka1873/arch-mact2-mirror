@@ -14,9 +14,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/repo
-          key: arch-mact2
+          key: arch-mact2-${{ commit.sha }}
           restore-keys: |
-            arch-mact2
+            arch-mact2-*
 
       - name: Download
         run: |
@@ -27,5 +27,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ github.workspace }}/repo/os/x86_64
-          gh release upload release ./* --clobber
+          gh release upload release ./* --clobber -R NoaHimesaka1873/arch-mact2-mirror
 
