@@ -11,20 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Get SHA1 from before commit
-        id: get_sha1
-        run: |
-          cd ${{ github.workspace }}
-          echo "sha1=$(git rev-parse HEAD^1)" >> $GITHUB_OUTPUT
+        uses: actions/checkout@v4
 
       - name: Get Cache
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/repo
-          # key should be commit SHA from before commit
-          key: arch-mact2-${{ steps.get_sha1.outputs.sha1 }}
+          key: arch-mact2-${{ github.sha }} 
           fail-on-cache-miss: false
 
       - name: Download
