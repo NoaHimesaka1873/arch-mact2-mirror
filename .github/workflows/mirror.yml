@@ -10,16 +10,20 @@ jobs:
   Download-and-upload:
     runs-on: ubuntu-latest
     steps:
+      - name: Cache
+        uses: actions/cache@v3
+        env:
+          cache-name: mirror-cache
+        with:
+          path: ${{ github.workspace }}/repo
+
       - name: Download
         run: |
           rsync -avz --delete rsync://mirror.funami.tech/arch-mact2/ ${{ github.workspace }}/repo
 
-      - name: Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/repo
-
       - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ github.workspace }}/repo/os/x86_64
           gh release upload release ./* --clobber
