@@ -1,4 +1,4 @@
-# Mirror from https://mirror.funami.tech/arch-mact2/os/x86_64 every 1 hour and upload to GitHub release in NoaHimesaka1873/arch-mact2-mirror repository
+# Mirror from rsync://mirror.funami.tech/arch-mact2 every 1 hour and upload to GitHub release in NoaHimesaka1873/arch-mact2-mirror repository
 name: Mirror
 
 on:
@@ -12,10 +12,15 @@ jobs:
     steps:
       - name: Download
         run: |
-          wget -m -np -nH --cut-dirs=3 -e robots=off --reject "index.html*" -P ${{ github.workspace }}/repo https://mirror.funami.tech/arch-mact2/os/x86_64
+          rsync -avz --delete rsync://mirror.funami.tech/arch-mact2/ ${{ github.workspace }}/repo
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/repo
 
       - name: Upload
         run: |
-          cd ${{ github.workspace }}/repo
+          cd ${{ github.workspace }}/repo/os/x86_64
           gh release upload release ./* --clobber
 
