@@ -1,4 +1,4 @@
-# Mirror from rsync://mirror.funami.tech/arch-mact2 every 1 hour and upload to GitHub release in NoaHimesaka1873/arch-mact2-mirror repository
+# Mirror each repo from rsync://mirror.funami.tech every 3 hours and upload it to its own GitHub release in NoaHimesaka1873/arch-mact2-mirror
 name: Mirror
 
 on:
@@ -8,6 +8,14 @@ on:
 
 jobs:
   Download-and-upload:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repo: arch-mact2
+            release: release
+          - repo: kait2en
+            release: kait2en
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,7 +25,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/repo
-          key: arch-mact2 
+          key: ${{ matrix.repo }}
           fail-on-cache-miss: false
       
       - name: Delete Cache
@@ -25,23 +33,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh extension install actions/gh-actions-cache
-          gh actions-cache delete arch-mact2 -R NoaHimesaka1873/arch-mact2-mirror -B senpai --confirm || true
+          gh actions-cache delete ${{ matrix.repo }} -R NoaHimesaka1873/arch-mact2-mirror -B senpai --confirm || true
 
       - name: Download
         run: |
-          rsync -avz --delete rsync://mirror.funami.tech/arch-mact2/ ${{ github.workspace }}/repo
+          rsync -avz --delete rsync://mirror.funami.tech/${{ matrix.repo }}/ ${{ github.workspace }}/repo
 
       - name: Save Cache
         uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/repo 
-          key: arch-mact2
+          key: ${{ matrix.repo }}
 
       - name: Upload
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ github.workspace }}/repo/os/x86_64
-          gh release upload release ./* --clobber -R NoaHimesaka1873/arch-mact2-mirror
-
-
+          gh release upload ${{ matrix.release }} ./* --clobber -R NoaHimesaka1873/arch-mact2-mirror
