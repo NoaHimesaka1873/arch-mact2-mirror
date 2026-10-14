@@ -1,0 +1,47 @@
+# Mirror from rsync://mirror.funami.tech/kait2en every 3 hours and upload to the kait2en GitHub release in NoaHimesaka1873/arch-mact2-mirror repository
+name: Mirror KaiT2en
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+jobs:
+  Download-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/repo
+          key: kait2en
+          fail-on-cache-miss: false
+      
+      - name: Delete Cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh extension install actions/gh-actions-cache
+          gh actions-cache delete kait2en -R NoaHimesaka1873/arch-mact2-mirror -B senpai --confirm || true
+
+      - name: Download
+        run: |
+          rsync -avz --delete rsync://mirror.funami.tech/kait2en/ ${{ github.workspace }}/repo
+
+      - name: Save Cache
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/repo 
+          key: kait2en
+
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ github.workspace }}/repo/os/x86_64
+          gh release upload kait2en ./* --clobber -R NoaHimesaka1873/arch-mact2-mirror
+
+
